@@ -2,11 +2,13 @@ use crate::game::Piece::{BISHOP, EMPTY, KING, KNIGHT, PAWN, QUEEN, ROOK};
 use crate::game::Team::BLACK;
 use crate::game::Team::WHITE;
 
+#[derive(Clone)]
 enum Team {
     WHITE,
     BLACK
 }
 
+#[derive(Clone)]
 enum Piece {
     EMPTY,
     PAWN(Team),
@@ -38,20 +40,28 @@ impl Board {
         }
     }
 
-    fn move_piece(&self, x1: u8, y1: u8, x2: u8, y2: u8) -> bool {
-        todo!();
-
+    fn move_piece(&mut self, x1: u8, y1: u8, x2: u8, y2: u8) -> bool {
         if self.is_valid_move(x1, y1, x2, y2) {
-
+            //TODO: how to unretart idk
+            let p = self.get(x1, y1);
+            self.set(x2, y2, p);
             return true;
         }
 
         false
     }
 
+    fn get(&self, x: u8, y: u8) -> &Piece {
+        &self.data[y as usize * 8 + x as usize]
+    }
+
+    fn set(&mut self, x: u8, y: u8, p: &Piece) {
+        self.data[y as usize * 8 + x as usize] = p.clone();
+    }
+
     fn is_valid_move(&self, x1: u8, y1: u8, x2: u8, y2: u8) -> bool {
-        let start: &Piece = &self.data[y1 as usize * 8 + x1 as usize];
-        let end: &Piece = &self.data[y2 as usize * 8 + x2 as usize];
+        let start: &Piece = self.get(x1, y1);
+        let end: &Piece = self.get(x2, y2);
 
         todo!()
     }
