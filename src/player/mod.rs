@@ -28,6 +28,13 @@ struct Brain {
 }
 
 impl Agent {
+    pub fn random(genome_length: usize, inside_size: usize) -> Agent {
+        Agent::new(
+            random_genome(genome_length),
+            inside_size
+        )
+    }
+
     pub fn new(genome: Vec<u32>, inside_size: usize) -> Agent {
         Agent {
             brain: Brain::new(

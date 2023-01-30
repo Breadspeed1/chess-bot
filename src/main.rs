@@ -9,7 +9,7 @@ use owlchess::board::PrettyStyle;
 use crate::player::Agent;
 
 fn main() {
-    let mut agent1: Agent = Agent::new(player::random_genome(8192), 256);
+    /*let mut agent1: Agent = Agent::new(player::random_genome(8192), 256);
     let mut agent2: Agent = Agent::new(player::random_genome(8192), 256);
 
     let mut game: Board = Board::initial();
@@ -29,5 +29,7 @@ fn main() {
     }
 
     println!("{}", game.calc_outcome().unwrap_or(Outcome::Draw(DrawReason::Moves75)));
-    sleep(Duration::from_secs(60));
+    sleep(Duration::from_secs(60));*/
+
+
 }
