@@ -17,7 +17,8 @@ pub struct Trainer {
     runs: usize,
     mutate_rate: f32,
     genome_length: usize,
-    inside_size: usize
+    inside_size: usize,
+    top: Vec<Agent>
 }
 
 struct Game {
@@ -43,11 +44,12 @@ impl Trainer {
             runs: 0,
             genome_length,
             inside_size,
-            mutate_rate
+            mutate_rate,
+            top: Vec::new()
         }
     }
 
-    pub fn run(&mut self) -> &Agent {
+    pub fn run(&mut self) {
         println!("generating players for tournament #{}", self.runs);
 
         let mut i: usize = 0;
@@ -64,13 +66,14 @@ impl Trainer {
         if x.len() > 0 {
             self.current = t.get_winners();
         }
-        else {
-            println!("no winners??");
-        }
 
         self.runs += 1;
 
-        &self.current[self.current.len() - 1]
+        self.top.push(self.current[self.current.len() - 1].clone());
+    }
+
+    pub fn get_from_recent(&self, i: usize) -> Agent {
+        self.top[self.top.len() - i - 1].clone()
     }
 }
 
