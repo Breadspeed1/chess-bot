@@ -14,6 +14,7 @@ pub fn random_genome(size: usize) -> Vec<u32> {
     out
 }
 
+#[derive(Clone)]
 pub struct Agent {
     brain: Brain,
     life: u64

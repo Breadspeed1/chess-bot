@@ -3,7 +3,9 @@ use owlchess::Outcome::{Draw, Win};
 use crate::player::Agent;
 
 struct Tournament {
-
+    players: Vec<Agent>,
+    winners: Vec<Agent>,
+    current_games: Vec<Game>
 }
 
 struct Game {
@@ -13,27 +15,74 @@ struct Game {
     moves: u32
 }
 
+impl Tournament {
+    fn new(players: Vec<Agent>) -> Tournament {
+        Tournament {
+            players,
+            winners: Vec::new(),
+            current_games: Vec::new()
+        }
+    }
+
+    fn set_games(&mut self) {
+        if self.players.len() % 2 != 0 {
+            self.players.pop();
+        }
+
+        for i in (0..self.players.len()).filter(|x| {x % 2 == 0}) {
+            self.current_games.push(Game::new(&self.players[i], &self.players[i + 1]));
+        }
+    }
+
+    fn play_through(&mut self) {
+        while self.players.len() > 1 {
+            self.play_round();
+        }
+    }
+
+    fn play_round(&mut self) {
+        self.set_games();
+        self.players.clear();
+        self.play_games();
+    }
+
+    fn play_games(&mut self) {
+        for i in 0..self.current_games.len() {
+            let res = self.current_games[i].play_through();
+
+            if let Some(x) = res.0 {
+                self.winners.push(x.clone());
+                self.players.push(x.clone());
+            }
+        }
+    }
+
+    fn get_winners(&self) -> Vec<Agent> {
+        self.winners.clone()
+    }
+}
+
 impl Game {
-    fn new(white: Agent, black: Agent) -> Game {
+    fn new(white: &Agent, black: &Agent) -> Game {
         Game {
             board: Board::initial(),
-            white,
-            black,
+            white: white.clone(),
+            black: black.clone(),
             moves: 0
         }
     }
 
-    fn play_through(&mut self) -> (&Agent, u32) {
+    fn play_through(&mut self) -> (Option<&Agent>, u32) {
         while !self.advance() || self.moves > 75 {
             self.moves += 1;
         }
 
         match self.board.calc_outcome().unwrap_or(Draw(DrawReason::Moves75)).winner() {
-            None => { todo!() },
+            None => { (None, self.moves) },
             Some(winner) => {
                 match winner {
-                    White => (&self.white, self.moves),
-                    Black => (&self.black, self.moves)
+                    Color::White => { (Some(&self.white), self.moves) }
+                    Color::Black => { (Some(&self.black), self.moves) }
                 }
             },
         }
