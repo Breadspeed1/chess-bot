@@ -1,3 +1,4 @@
+use std::thread::current;
 use libm::round;
 use owlchess::{Board, Color, DrawReason, Outcome};
 use owlchess::Outcome::{Draw, Win};
@@ -10,11 +11,35 @@ pub struct Tournament {
     round: u32
 }
 
+pub struct Trainer {
+    current: Vec<Agent>,
+    size: usize
+}
+
 struct Game {
     board: Board,
     white: Agent,
     black: Agent,
     moves: u32
+}
+
+impl Trainer {
+    pub fn new(size: usize) -> Trainer {
+        let mut players: Vec<Agent> = Vec::new();
+
+        for _ in 0..size {
+            players.push(Agent::random(8192, 256));
+        }
+
+        Trainer {
+            current: players,
+            size
+        }
+    }
+
+    pub fn run(&mut self) -> &Agent {
+        let t = Tournament::new(self.current.clone());
+    }
 }
 
 impl Tournament {
