@@ -39,6 +39,13 @@ impl Trainer {
 
     pub fn run(&mut self) -> &Agent {
         let t = Tournament::new(self.current.clone());
+
+        let mut i: usize = 0;
+        while self.current.len() < self.size {
+            self.current.push(self.current[i % self.current.len()].make_child(0.001));
+        }
+
+        todo!()
     }
 }
 
@@ -69,7 +76,7 @@ impl Tournament {
     }
 
     fn play_round(&mut self) {
-        println!("on round {}", self.round);
+        println!("on round {} with {} players", self.round, self.players.len());
 
         self.current_games.clear();
         self.set_games();

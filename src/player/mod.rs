@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter, Write};
 use libm::tanh;
-use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece};
+use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color};
 use rand::{RngCore, thread_rng};
 
 mod binary_util;
@@ -59,6 +59,13 @@ impl Agent {
         }
     }
 
+    pub fn make_child(&self, mutation_rate: f32) -> Agent {
+        Agent::new(
+            self.brain.get_mutated_genome(mutation_rate),
+            self.brain.inside_size
+        )
+    }
+
     pub fn get_next_move(&mut self, board: &Board) -> Move {
         self.life += 1;
         self.brain.get_move(board, (self.life % 2) as f32, tanh(thread_rng().next_u32() as f64) as f32)
@@ -71,7 +78,7 @@ impl Brain {
             genome,
             inside_size,
             neurons: [
-                vec![0.0; (64 * 6) + 2],
+                vec![0.0; (64 * 6) + 3],
                 vec![0.0; inside_size],
                 vec![0.0; 128]
             ],
@@ -81,6 +88,10 @@ impl Brain {
         b.generate_connections();
 
         b
+    }
+
+    fn get_mutated_genome(mutation_rate: f32) -> Vec<u32> {
+        todo!()
     }
 
     pub fn get_move(&mut self, board: &Board, osc: f32, random: f32) -> Move {
@@ -94,6 +105,10 @@ impl Brain {
 
         self.neurons[0][384] = osc;
         self.neurons[0][385] = random;
+        self.neurons[0][386] = match board.side() {
+            Color::White => { 0.0 }
+            Color::Black => { 1.0 }
+        };
 
         let mut max: (usize, f32) = (0, self.neurons[2][0]);
 
@@ -125,7 +140,7 @@ impl Brain {
 
     fn reset(&mut self) {
         self.neurons = [
-            vec![0.0; (64 * 6) + 2],
+            vec![0.0; (64 * 6) + 3],
             vec![0.0; self.inside_size],
             vec![0.0; 128]
         ];
