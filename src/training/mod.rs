@@ -141,7 +141,7 @@ impl Game {
     }
 
     fn play_through(&mut self) -> (Option<&Agent>, u32) {
-        while !self.advance() && self.moves < 75 {
+        while !self.advance() && self.moves < 150 {
             self.moves += 1;
         }
 
