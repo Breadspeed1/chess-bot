@@ -97,7 +97,7 @@ impl Brain {
             }}
         };
 
-        self.neurons[0][(idx / 8) + offset] = 1.0;
+        self.neurons[0][(idx * 6) + offset] = 1.0;
     }
 
     fn reset(&mut self) {
@@ -116,8 +116,6 @@ impl Brain {
 
             self.neurons[connection.sink_type as usize][connection.sink_id as usize] += connection.weight * self.neurons[connection.source_type as usize][connection.source_id as usize];
         }
-
-        /*println!("{:?}", self.neurons[1]);*/
     }
 
     fn generate_connections(&mut self) {
