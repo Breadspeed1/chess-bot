@@ -7,8 +7,24 @@ use clearscreen::clear;
 use owlchess::{Board, Color, DrawReason, Make, Outcome};
 use owlchess::board::PrettyStyle;
 use crate::player::Agent;
+use crate::training::Tournament;
 
 fn main() {
+    let mut players: Vec<Agent> = Vec::new();
+
+    for x in 0..8192 {
+        players.push(Agent::random(8192, 256));
+        if x % 100 == 0 {
+            println!("on agent {}", x);
+        }
+    }
+
+    let mut tournament: Tournament = Tournament::new(players);
+
+    tournament.play_through();
+
+    println!("{:?}", tournament.get_winners());
+
     /*let mut agent1: Agent = Agent::new(player::random_genome(8192), 256);
     let mut agent2: Agent = Agent::new(player::random_genome(8192), 256);
 
@@ -30,6 +46,4 @@ fn main() {
 
     println!("{}", game.calc_outcome().unwrap_or(Outcome::Draw(DrawReason::Moves75)));
     sleep(Duration::from_secs(60));*/
-
-
 }

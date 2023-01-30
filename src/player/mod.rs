@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Display, Formatter, Write};
 use libm::tanh;
 use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece};
 use rand::{RngCore, thread_rng};
@@ -20,11 +21,24 @@ pub struct Agent {
     life: u64
 }
 
+#[derive(Clone)]
 struct Brain {
     genome: Vec<u32>,
     inside_size: usize,
     neurons: [Vec<f32>; 3],
     connections: Vec<Connection>
+}
+
+impl Display for Agent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Agent")
+    }
+}
+
+impl Debug for Agent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Agent")
+    }
 }
 
 impl Agent {
@@ -46,6 +60,7 @@ impl Agent {
     }
 
     pub fn get_next_move(&mut self, board: &Board) -> Move {
+        self.life += 1;
         self.brain.get_move(board, (self.life % 2) as f32, tanh(thread_rng().next_u32() as f64) as f32)
     }
 }
@@ -164,6 +179,7 @@ impl Brain {
     }
 }
 
+#[derive(Clone)]
 struct Connection {
     source_type: u8,
     source_id: u32,

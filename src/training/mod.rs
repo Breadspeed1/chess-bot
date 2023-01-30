@@ -1,11 +1,13 @@
+use libm::round;
 use owlchess::{Board, Color, DrawReason, Outcome};
 use owlchess::Outcome::{Draw, Win};
 use crate::player::Agent;
 
-struct Tournament {
+pub struct Tournament {
     players: Vec<Agent>,
     winners: Vec<Agent>,
-    current_games: Vec<Game>
+    current_games: Vec<Game>,
+    round: u32
 }
 
 struct Game {
@@ -16,11 +18,12 @@ struct Game {
 }
 
 impl Tournament {
-    fn new(players: Vec<Agent>) -> Tournament {
+    pub fn new(players: Vec<Agent>) -> Tournament {
         Tournament {
             players,
             winners: Vec::new(),
-            current_games: Vec::new()
+            current_games: Vec::new(),
+            round: 0
         }
     }
 
@@ -34,16 +37,21 @@ impl Tournament {
         }
     }
 
-    fn play_through(&mut self) {
+    pub fn play_through(&mut self) {
         while self.players.len() > 1 {
             self.play_round();
         }
     }
 
     fn play_round(&mut self) {
+        println!("on round {}", self.round);
+
+        self.current_games.clear();
         self.set_games();
         self.players.clear();
         self.play_games();
+
+        self.round += 1;
     }
 
     fn play_games(&mut self) {
@@ -57,7 +65,7 @@ impl Tournament {
         }
     }
 
-    fn get_winners(&self) -> Vec<Agent> {
+    pub fn get_winners(&self) -> Vec<Agent> {
         self.winners.clone()
     }
 }
@@ -73,7 +81,7 @@ impl Game {
     }
 
     fn play_through(&mut self) -> (Option<&Agent>, u32) {
-        while !self.advance() || self.moves > 75 {
+        while !self.advance() && self.moves < 75 {
             self.moves += 1;
         }
 
@@ -81,8 +89,14 @@ impl Game {
             None => { (None, self.moves) },
             Some(winner) => {
                 match winner {
-                    Color::White => { (Some(&self.white), self.moves) }
-                    Color::Black => { (Some(&self.black), self.moves) }
+                    Color::White => {
+                        println!("white win");
+                        (Some(&self.white), self.moves)
+                    }
+                    Color::Black => {
+                        println!("black win");
+                        (Some(&self.black), self.moves)
+                    }
                 }
             },
         }
