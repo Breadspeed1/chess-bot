@@ -69,7 +69,7 @@ impl Trainer {
 
         self.runs += 1;
 
-        self.top.push(self.current[self.current.len() - 1].clone());
+        self.top.push(self.current[0].clone());
     }
 
     pub fn get_from_recent(&self, i: usize) -> Agent {
@@ -119,7 +119,7 @@ impl Tournament {
             let res = self.current_games[i].play_through();
 
             if let Some(x) = res.0 {
-                self.winners.push(x.clone());
+                self.winners.insert(0, x.clone());
                 self.players.push(x.clone());
             }
         }

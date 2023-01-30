@@ -12,7 +12,7 @@ use crate::training::{Tournament, Trainer};
 fn main() {
     let mut trainer: Trainer = Trainer::new(4096, 512, 64, 0.001);
 
-    for _ in 0..50 {
+    for _ in 0..150 {
         trainer.run();
     }
 
