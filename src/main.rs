@@ -27,7 +27,7 @@ fn main() {
             Color::Black => { board = board.make_move(two.get_next_move(&board)).expect("failed to make move"); }
         }
 
-        clear();
+        clear().expect("error clearing screen");
         println!("{}", board.pretty(PrettyStyle::Ascii));
         sleep(Duration::from_millis(500));
     }
