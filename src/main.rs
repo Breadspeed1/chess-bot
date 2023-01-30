@@ -1,4 +1,5 @@
 mod player;
+mod training;
 
 use std::thread::sleep;
 use std::time::Duration;
@@ -8,8 +9,8 @@ use owlchess::board::PrettyStyle;
 use crate::player::Agent;
 
 fn main() {
-    let mut agent1: Agent = Agent::new(player::random_genome(8192), 2048);
-    let mut agent2: Agent = Agent::new(player::random_genome(8192), 2048);
+    let mut agent1: Agent = Agent::new(player::random_genome(8192), 128);
+    let mut agent2: Agent = Agent::new(player::random_genome(8192), 128);
 
     let mut game: Board = Board::initial();
     let mut moves: u32 = 0;
@@ -22,7 +23,7 @@ fn main() {
 
         clear().expect("failed to clear screen");
         println!("{}", game.pretty(PrettyStyle::Ascii));
-        sleep(Duration::from_millis(20));
+        sleep(Duration::from_millis(10));
     }
 
     println!("{}", game.calc_outcome().unwrap_or(Outcome::Draw(DrawReason::Unknown)));

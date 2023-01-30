@@ -15,7 +15,8 @@ pub fn random_genome(size: usize) -> Vec<u32> {
 }
 
 pub struct Agent {
-    brain: Brain
+    brain: Brain,
+    life: u64
 }
 
 struct Brain {
@@ -31,12 +32,13 @@ impl Agent {
             brain: Brain::new(
                 genome,
                 inside_size
-            )
+            ),
+            life: 0
         }
     }
 
     pub fn get_next_move(&mut self, board: &Board) -> Move {
-        self.brain.get_move(board)
+        self.brain.get_move(board, (self.life % 2) as f32, tanh(thread_rng().next_u32() as f64) as f32)
     }
 }
 
@@ -46,7 +48,7 @@ impl Brain {
             genome,
             inside_size,
             neurons: [
-                vec![0.0; 64 * 6],
+                vec![0.0; (64 * 6) + 2],
                 vec![0.0; inside_size],
                 vec![0.0; 128]
             ],
@@ -58,7 +60,7 @@ impl Brain {
         b
     }
 
-    pub fn get_move(&mut self, board: &Board) -> Move {
+    pub fn get_move(&mut self, board: &Board, osc: f32, random: f32) -> Move {
         self.reset();
 
         for i in 0..64 as usize {
@@ -66,6 +68,9 @@ impl Brain {
         }
 
         self.calc();
+
+        self.neurons[0][384] = osc;
+        self.neurons[0][385] = random;
 
         let mut max: (usize, f32) = (0, self.neurons[2][0]);
 
@@ -97,7 +102,7 @@ impl Brain {
 
     fn reset(&mut self) {
         self.neurons = [
-            vec![0.0; 64 * 6],
+            vec![0.0; (64 * 6) + 2],
             vec![0.0; self.inside_size],
             vec![0.0; 128]
         ];
@@ -105,8 +110,14 @@ impl Brain {
 
     fn calc(&mut self) {
         for connection in &self.connections {
-            self.neurons[connection.sink_type as usize][connection.sink_id as usize] = tanh(self.neurons[connection.source_type as usize][connection.source_id as usize] as f64) as f32;
+            if connection.source_type != 0 {
+                self.neurons[connection.source_type as usize][connection.source_id as usize] = tanh(self.neurons[connection.source_type as usize][connection.source_id as usize] as f64) as f32;
+            }
+
+            self.neurons[connection.sink_type as usize][connection.sink_id as usize] += connection.weight * self.neurons[connection.source_type as usize][connection.source_id as usize];
         }
+
+        /*println!("{:?}", self.neurons[1]);*/
     }
 
     fn generate_connections(&mut self) {
