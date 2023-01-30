@@ -10,9 +10,9 @@ use crate::player::Agent;
 use crate::training::{Tournament, Trainer};
 
 fn main() {
-    let mut trainer: Trainer = Trainer::new(4096, 512, 64, 0.001);
+    let mut trainer: Trainer = Trainer::new(4096, 1024, 256, 0.001);
 
-    for _ in 0..150 {
+    for _ in 0..50 {
         trainer.run();
     }
 
