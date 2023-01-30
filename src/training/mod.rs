@@ -13,7 +13,11 @@ pub struct Tournament {
 
 pub struct Trainer {
     current: Vec<Agent>,
-    size: usize
+    size: usize,
+    runs: usize,
+    mutate_rate: f32,
+    genome_length: usize,
+    inside_size: usize
 }
 
 struct Game {
@@ -24,28 +28,49 @@ struct Game {
 }
 
 impl Trainer {
-    pub fn new(size: usize) -> Trainer {
+    pub fn new(size: usize, genome_length: usize, inside_size: usize, mutate_rate: f32) -> Trainer {
         let mut players: Vec<Agent> = Vec::new();
 
+        println!("generating initial players");
+
         for _ in 0..size {
-            players.push(Agent::random(8192, 256));
+            players.push(Agent::random(genome_length, inside_size));
         }
 
         Trainer {
             current: players,
-            size
+            size,
+            runs: 0,
+            genome_length,
+            inside_size,
+            mutate_rate
         }
     }
 
     pub fn run(&mut self) -> &Agent {
-        let t = Tournament::new(self.current.clone());
+        println!("generating players for tournament #{}", self.runs);
 
         let mut i: usize = 0;
         while self.current.len() < self.size {
-            self.current.push(self.current[i % self.current.len()].make_child(0.001));
+            self.current.push(self.current[i % self.current.len()].make_child(self.mutate_rate));
         }
 
-        todo!()
+        println!("starting tournament #{}", self.runs);
+        let mut t = Tournament::new(self.current.clone());
+
+        t.play_through();
+        let x = t.get_winners();
+
+        if x.len() > 0 {
+            self.current = t.get_winners();
+        }
+        else {
+            println!("no winners??");
+        }
+
+        self.runs += 1;
+
+        &self.current[self.current.len() - 1]
     }
 }
 
@@ -122,11 +147,9 @@ impl Game {
             Some(winner) => {
                 match winner {
                     Color::White => {
-                        println!("white win");
                         (Some(&self.white), self.moves)
                     }
                     Color::Black => {
-                        println!("black win");
                         (Some(&self.black), self.moves)
                     }
                 }

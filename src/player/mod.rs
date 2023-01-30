@@ -90,8 +90,22 @@ impl Brain {
         b
     }
 
-    fn get_mutated_genome(mutation_rate: f32) -> Vec<u32> {
-        todo!()
+    fn get_mutated_genome(&self, mutation_rate: f32) -> Vec<u32> {
+        let mut out: Vec<u32> = Vec::new();
+
+        for x in &self.genome {
+            let mut c = *x;
+
+            for j in 0..32 {
+                if thread_rng().next_u32() % ((1.0/mutation_rate) as u32) == 1 {
+                    c ^= 1 << j;
+                }
+            }
+
+            out.push(c);
+        }
+
+        out
     }
 
     pub fn get_move(&mut self, board: &Board, osc: f32, random: f32) -> Move {
