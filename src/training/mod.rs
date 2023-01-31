@@ -51,7 +51,7 @@ impl Trainer {
     pub fn run(&mut self) {
         println!("generating players for tournament #{}", self.runs);
 
-        let mut i: usize = 0;
+        /*let mut i: usize = 0;
         while self.current.len() < self.size {
             self.current.push(self.current[i % self.current.len()].make_child(self.mutate_rate));
         }
@@ -65,19 +65,8 @@ impl Trainer {
         if x.len() > 0 {
             self.current = t.get_winners();
         }
-
+*/
         self.runs += 1;
-
-        self.save(&self.current[0], "out");
-    }
-
-    fn save(&self, agent: &Agent, path: &str) {
-        let mut data = agent.get_inside_size().to_be_bytes().to_vec();
-        data.append(&mut agent.get_data());
-
-        let mut f = OpenOptions::new().write(true).create_new(true).open(format!("{}/{}.agent", path, self.runs)).expect("unable to create file");
-
-        f.write_all(data.as_slice()).expect("unable to write agent data");
     }
 }
 
@@ -99,17 +88,17 @@ impl Tournament {
         }
     }
 
-    pub fn get_top_x() -> Vec<&Agent> {
+    /*pub fn get_top_x() -> Vec<&Agent> {
         Vec::new()
-    }
+    }*/
 }
 
 impl Game {
     fn new(white: &Agent, black: &Agent) -> Game {
         Game {
             board: Board::initial(),
-            white: white.clone(),
-            black: black.clone(),
+            white: Agent::random(0, 0),
+            black: Agent::random(0, 0),
             moves: 0
         }
     }
@@ -135,14 +124,14 @@ impl Game {
     }
 
     fn advance(&mut self) -> bool {
-        match self.side() {
+        /*match self.side() {
             Color::White => {
                 self.board = self.board.make_move(self.white.get_next_move(&self.board)).expect("failed to make move");
             }
             Color::Black => {
                 self.board = self.board.make_move(self.black.get_next_move(&self.board)).expect("failed to make move");
             }
-        }
+        }*/
 
         !self.board.has_legal_moves()
     }
