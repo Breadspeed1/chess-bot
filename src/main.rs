@@ -6,6 +6,7 @@ use std::time::Duration;
 use clearscreen::clear;
 use owlchess::{Board, Color, DrawReason, Make, MoveChain, Outcome};
 use owlchess::board::PrettyStyle;
+use rand::thread_rng;
 use crate::player::Agent;
 use crate::training::{Tournament, Trainer};
 

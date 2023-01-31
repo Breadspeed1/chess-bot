@@ -1,3 +1,7 @@
+use std::fs::{File, OpenOptions};
+use std::io::Write;
+use std::ops::Add;
+use std::path::Path;
 use std::thread::current;
 use libm::round;
 use owlchess::{Board, Color, DrawReason, Outcome};
@@ -69,7 +73,16 @@ impl Trainer {
 
         self.runs += 1;
 
+        self.save(&self.current[0], "out");
+
         self.top.push(self.current[0].clone());
+    }
+
+    fn save(&self, agent: &Agent, path: &str) {
+        let data = agent.get_data();
+        let mut f = OpenOptions::new().write(true).create_new(true).open(format!("{}/{}.agent", path, self.runs)).expect("unable to create file");
+
+        f.write_all(data.as_slice()).expect("unable to write agent data");
     }
 
     pub fn get_from_recent(&self, i: usize) -> Agent {
