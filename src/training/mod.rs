@@ -79,7 +79,9 @@ impl Trainer {
     }
 
     fn save(&self, agent: &Agent, path: &str) {
-        let data = agent.get_data();
+        let mut data = agent.get_inside_size().to_be_bytes().to_vec();
+        data.append(&mut agent.get_data());
+
         let mut f = OpenOptions::new().write(true).create_new(true).open(format!("{}/{}.agent", path, self.runs)).expect("unable to create file");
 
         f.write_all(data.as_slice()).expect("unable to write agent data");

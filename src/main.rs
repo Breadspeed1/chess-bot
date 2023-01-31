@@ -1,6 +1,8 @@
 mod player;
 mod training;
 
+use std::env;
+use std::fmt::format;
 use std::thread::sleep;
 use std::time::Duration;
 use clearscreen::clear;
@@ -11,17 +13,41 @@ use crate::player::Agent;
 use crate::training::{Tournament, Trainer};
 
 fn main() {
-    let mut trainer: Trainer = Trainer::new(4096, 512, 64, 0.001);
+    let args: Vec<String> = env::args().collect();
 
-    for _ in 0..100000 {
-        trainer.run();
+    println!("{:?}", args);
+
+    match args[1].as_str() {
+        "fight" => {
+            fight(
+                Agent::from_file(format!("out/{}.agent", args[2]).as_str()),
+                Agent::from_file(format!("out/{}.agent", args[3]).as_str())
+            )
+        },
+        "train" => {
+            if args.len() == 4 {
+
+            }
+            else {
+                let mut trainer: Trainer = Trainer::new(4096, 512, 64, 0.001);
+
+                for _ in 0..100000 {
+                    trainer.run();
+                }
+            }
+        },
+        _ => panic!("action not specified! (fight/train)")
     }
+}
 
-    let mut one = trainer.get_from_recent(0);
-    let mut two = trainer.get_from_recent(1);
+fn fight(o: Agent, t: Agent) {
+    let mut one = o;
+    let mut two = t;
 
     let mut board: Board = Board::initial();
     let mut game: MoveChain = MoveChain::default();
+
+    println!("starting game");
 
     while board.has_legal_moves() {
         match board.side() {
@@ -36,13 +62,7 @@ fn main() {
                 game.push(x).expect("failed to make move");
             }
         }
-
-        /*clear().expect("error clearing screen");
-        println!("{}", board.pretty(PrettyStyle::Ascii));
-        sleep(Duration::from_millis(500));*/
     }
-
-    //println!("{}", board.calc_outcome().unwrap_or(Outcome::Draw(DrawReason::Unknown)));
     println!("{}", game.uci());
     sleep(Duration::from_secs(60));
 }

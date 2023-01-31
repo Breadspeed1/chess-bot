@@ -1,4 +1,7 @@
 use std::fmt::{Debug, Display, Formatter, Write};
+use std::fs::{File, OpenOptions};
+use std::io::Read;
+use std::u32;
 use libm::tanh;
 use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color};
 use rand::{RngCore, thread_rng};
@@ -44,6 +47,35 @@ impl Agent {
     pub fn random(genome_length: usize, inside_size: usize) -> Agent {
         Agent::new(
             random_genome(genome_length),
+            inside_size
+        )
+    }
+
+    pub fn get_inside_size(&self) -> u32 {
+        self.brain.sizes[1] as u32
+    }
+
+    pub fn from_file(path: &str) -> Agent {
+        let mut genome: Vec<u32> = Vec::new();
+        let mut data: Vec<u8> = Vec::new();
+        let mut f = OpenOptions::new().read(true).open(path).expect("unable to open agent");
+        println!("reading agent data");
+        f.read_to_end(&mut data).expect("failed to read file");
+
+        let inside_size = u32::from_be_bytes([data[0], data[1], data[2], data[3]]) as usize;
+
+        let split_data = data.chunks_exact(4);
+
+        println!("processing agent data");
+        for x in split_data {
+            genome.push(u32::from_be_bytes([x[0], x[1], x[2], x[3]]));
+        }
+
+        genome.remove(0);
+
+        println!("creating agent");
+        Agent::new(
+            genome,
             inside_size
         )
     }
