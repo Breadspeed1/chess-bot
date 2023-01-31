@@ -1,9 +1,9 @@
 use std::fmt::{Debug, Display, Formatter, Write};
 use std::fs::{File, OpenOptions};
 use std::io::Read;
-use std::u32;
+use std::{result, u32};
 use libm::tanh;
-use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color, MoveKind, Outcome};
+use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color, MoveKind, Outcome, MoveChain};
 use rand::{RngCore, thread_rng};
 
 mod binary_util;
@@ -23,8 +23,9 @@ pub struct Agent {
     brain: Brain,
     life: u64,
     games_won: u32,
-    pieces_taken: u32,
-    pieces_lost: u32
+    pieces_left: u32,
+    opponent_left: u32,
+    moves_per_game: f32
 }
 
 #[derive(Clone)]
@@ -91,21 +92,63 @@ impl Agent {
             ),
             life: 0,
             games_won: 0,
-            pieces_taken: 0,
-            pieces_lost: 0
+            pieces_left: 0,
+            opponent_left: 0,
+            moves_per_game: 0.0
         }
     }
 
-    pub fn track_win(&mut self, end_board: &Board, result: Outcome) {
+    pub fn track_game(&mut self, ending: &Board, res: Outcome, color: Color, moves: u32) {
+        let mut opponent: u32 = 0;
+        let mut you: u32 = 0;
 
+        for x in 0..63 as usize {
+            let cell = ending.get(Coord::from_index(x));
+
+            if let Some(c) = cell.color() {
+                if c == color {
+                    you += Self::piece_points(cell.piece().unwrap());
+                }
+                else {
+                    opponent += Self::piece_points(cell.piece().unwrap());
+                }
+            }
+        }
+
+        self.pieces_left += you;
+        self.opponent_left += opponent;
+
+        if self.moves_per_game = 0.0 {
+            self.moves_per_game = moves as f32;
+        }
+        else {
+            self.moves_per_game = (self.moves_per_game + moves)/2.0;
+        }
+
+        if let Some(w) = res.winner() {
+            if w == color {
+                self.games_won += 1;
+            }
+        }
+    }
+
+    fn piece_points(piece: Piece) -> u32 {
+        match piece {
+            Piece::Pawn => { 1 }
+            Piece::King => { 0 }
+            Piece::Knight => { 3 }
+            Piece::Bishop => { 3 }
+            Piece::Rook => { 5 }
+            Piece::Queen => { 9 }
+        }
     }
 
     pub fn get_rating(&self) -> f32 {
-        if self.pieces_lost == 0 {
+        if self.pieces_lost == 0 || self.moves_per_game == 0.0 {
             0.0
         }
 
-         (self.pieces_taken as f32/self.pieces_lost as f32) * 10.0 * (self.games_won as f32)
+        ((self.pieces_left as f32/self.opponent_left as f32) * 10.0 * (self.games_won as f32))/self.moves_per_game
     }
 
     pub fn make_child(&self, mutation_rate: f32) -> Agent {
