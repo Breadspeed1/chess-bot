@@ -3,7 +3,7 @@ use std::fs::{File, OpenOptions};
 use std::io::Read;
 use std::u32;
 use libm::tanh;
-use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color};
+use owlchess::{movegen::legal, Board, Cell, Coord, Move, Piece, Color, MoveKind, Outcome};
 use rand::{RngCore, thread_rng};
 
 mod binary_util;
@@ -21,7 +21,10 @@ pub fn random_genome(size: usize) -> Vec<u32> {
 #[derive(Clone)]
 pub struct Agent {
     brain: Brain,
-    life: u64
+    life: u64,
+    games_won: u32,
+    pieces_taken: u32,
+    pieces_lost: u32
 }
 
 #[derive(Clone)]
@@ -84,10 +87,25 @@ impl Agent {
         Agent {
             brain: Brain::new(
                 genome,
-                inside_size
+                inside_size,
             ),
-            life: 0
+            life: 0,
+            games_won: 0,
+            pieces_taken: 0,
+            pieces_lost: 0
         }
+    }
+
+    pub fn track_win(&mut self, end_board: &Board, result: Outcome) {
+
+    }
+
+    pub fn get_rating(&self) -> f32 {
+        if self.pieces_lost == 0 {
+            0.0
+        }
+
+         (self.pieces_taken as f32/self.pieces_lost as f32) * 10.0 * (self.games_won as f32)
     }
 
     pub fn make_child(&self, mutation_rate: f32) -> Agent {
