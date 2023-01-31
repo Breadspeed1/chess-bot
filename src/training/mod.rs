@@ -21,8 +21,7 @@ pub struct Trainer {
     runs: usize,
     mutate_rate: f32,
     genome_length: usize,
-    inside_size: usize,
-    top: Vec<Agent>
+    inside_size: usize
 }
 
 struct Game {
@@ -48,8 +47,7 @@ impl Trainer {
             runs: 0,
             genome_length,
             inside_size,
-            mutate_rate,
-            top: Vec::new()
+            mutate_rate
         }
     }
 
@@ -74,8 +72,6 @@ impl Trainer {
         self.runs += 1;
 
         self.save(&self.current[0], "out");
-
-        self.top.push(self.current[0].clone());
     }
 
     fn save(&self, agent: &Agent, path: &str) {
@@ -85,10 +81,6 @@ impl Trainer {
         let mut f = OpenOptions::new().write(true).create_new(true).open(format!("{}/{}.agent", path, self.runs)).expect("unable to create file");
 
         f.write_all(data.as_slice()).expect("unable to write agent data");
-    }
-
-    pub fn get_from_recent(&self, i: usize) -> Agent {
-        self.top[self.top.len() - i - 1].clone()
     }
 }
 
