@@ -9,10 +9,7 @@ use owlchess::Outcome::{Draw, Win};
 use crate::player::Agent;
 
 pub struct Tournament {
-    players: Vec<Agent>,
-    winners: Vec<Agent>,
-    current_games: Vec<Game>,
-    round: u32
+    players: Vec<Agent>
 }
 
 pub struct Trainer {
@@ -87,53 +84,23 @@ impl Trainer {
 impl Tournament {
     pub fn new(players: Vec<Agent>) -> Tournament {
         Tournament {
-            players,
-            winners: Vec::new(),
-            current_games: Vec::new(),
-            round: 0
-        }
-    }
-
-    fn set_games(&mut self) {
-        if self.players.len() % 2 != 0 {
-            self.players.pop();
-        }
-
-        for i in (0..self.players.len()).filter(|x| {x % 2 == 0}) {
-            self.current_games.push(Game::new(&self.players[i], &self.players[i + 1]));
+            players
         }
     }
 
     pub fn play_through(&mut self) {
-        while self.players.len() > 1 {
-            self.play_round();
-        }
-    }
-
-    fn play_round(&mut self) {
-        println!("on round {} with {} players", self.round, self.players.len());
-
-        self.current_games.clear();
-        self.set_games();
-        self.players.clear();
-        self.play_games();
-
-        self.round += 1;
-    }
-
-    fn play_games(&mut self) {
-        for i in 0..self.current_games.len() {
-            let res = self.current_games[i].play_through();
-
-            if let Some(x) = res.0 {
-                self.winners.insert(0, x.clone());
-                self.players.push(x.clone());
+        for i in 0..self.players.len() {
+            for j in 0..self.players.len() {
+                if j != i {
+                    let black = &self.players[i];
+                    let white = &self.players[j];
+                }
             }
         }
     }
 
-    pub fn get_winners(&self) -> Vec<Agent> {
-        self.winners.clone()
+    pub fn get_top_x() -> Vec<&Agent> {
+        Vec::new()
     }
 }
 
