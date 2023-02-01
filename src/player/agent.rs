@@ -12,12 +12,6 @@ pub struct OrganicAgent {
     rating: f64
 }
 
-impl Clone for OrganicAgent {
-    fn clone(&self) -> Self {
-        OrganicAgent::new(&self.brain)
-    }
-}
-
 impl OrganicAgent {
     pub fn new(brain: &Arc<OrganicNNBrain>) -> OrganicAgent {
         OrganicAgent {

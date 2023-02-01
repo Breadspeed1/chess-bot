@@ -28,8 +28,8 @@ fn main() {
         },
         "train" => {
             let settings: OrganicTrainerSettings = OrganicTrainerSettings {
-                connection_count: 1024,
-                inner_neuron_count: 128,
+                connection_count: 2048,
+                inner_neuron_count: 256,
                 mutation_rate: 0.001,
                 pool_size: 64,
                 save_path: "out".to_string(),
