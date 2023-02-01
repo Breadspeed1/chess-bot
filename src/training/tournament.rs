@@ -56,11 +56,12 @@ fn calc_score(board: &Board, moves: usize, winner: Option<Color>) -> (f64, f64) 
     let mut black_points = get_color_points(board, &Color::Black).clamp(1, usize::MAX);
 
     let mut out = match winner {
-        None => { (0.5, 0.5) }
+        None => { (0.0, 0.0) }
         Some(color) => {
             match color {
-                Color::White => { (1.0, -1.0) }
-                Color::Black => { (-1.5, 1.5) }
+                Color::White => { (1.0, -2.0) }
+
+                Color::Black => { (-2.0, 1.0) }
             }
         }
     };
@@ -71,16 +72,16 @@ fn calc_score(board: &Board, moves: usize, winner: Option<Color>) -> (f64, f64) 
         out.0 *= white_points as f64/black_points as f64;
     }
     else {
-        out.0 *= black_points as f64/white_points as f64;
+        out.0 *= (black_points as f64/white_points as f64);
     }
 
     if out.0 > 0.0 {
         out.1 *= black_points as f64/white_points as f64;
     }
     else {
-        out.1 *= white_points as f64/black_points as f64;
+        out.1 *= (white_points as f64/black_points as f64);
     }
 
-    //(out.0 / (moves as f64 / 50.0), out.1 / (moves as f64 / 50.0))
+    //(out.0 / moves as f64, out.1 / moves as f64)
     out
 }
