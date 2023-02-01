@@ -59,8 +59,8 @@ fn calc_score(board: &Board, moves: usize, winner: Option<Color>) -> (f64, f64) 
         None => { (0.5, 0.5) }
         Some(color) => {
             match color {
-                Color::White => { (1.0, 0.1) }
-                Color::Black => { (0.1, 1.0) }
+                Color::White => { (1.0, -1.0) }
+                Color::Black => { (-1.0, 1.0) }
             }
         }
     };

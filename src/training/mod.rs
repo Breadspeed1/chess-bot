@@ -1,3 +1,5 @@
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::ops::Add;
 use std::sync::Arc;
 use crate::player::agent::OrganicAgent;
@@ -37,6 +39,9 @@ impl OrganicTrainer {
         for _ in 0..self.settings.pool_size {
             self.pool.push(Arc::new(OrganicNNBrain::random(self.settings.inner_neuron_count, self.settings.connection_count)));
         }
+
+        OpenOptions::new().write(true).create(true).append(true).open(format!("{}/stats.stat", self.settings.save_path)).expect("failed to create file");
+
         println!("finished creating initial pool");
     }
 
@@ -66,6 +71,8 @@ impl OrganicTrainer {
         println!("saving agent");
         if !self.settings.save_path.is_empty() {
             players[0].get_brain().write_to(format!("{}/{}.agent", self.settings.save_path, self.generation).as_str());
+            OpenOptions::new().write(true).append(true).open(format!("{}/stats.stat", self.settings.save_path)).expect("failed to create file").write_all(&players[0].get_rating().to_be_bytes()).expect("failed to write to stat file");
+
         }
 
         println!("top rating for generation {}: {}", self.generation, players[0].get_rating());
