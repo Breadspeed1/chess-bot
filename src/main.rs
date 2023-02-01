@@ -28,12 +28,12 @@ fn main() {
         },
         "train" => {
             let settings: OrganicTrainerSettings = OrganicTrainerSettings {
-                connection_count: 2048,
-                inner_neuron_count: 256,
-                mutation_rate: 0.002,
+                connection_count: 128,
+                inner_neuron_count: 32,
+                mutation_rate: 0.001,
                 pool_size: 64,
                 save_path: "out".to_string(),
-                reproduction_sample: 4,
+                reproduction_sample: 8,
             };
 
             let mut trainer: OrganicTrainer = OrganicTrainer::new(settings);

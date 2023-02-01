@@ -40,8 +40,13 @@ pub fn play_organic_game(white: &OrganicAgent, black: &OrganicAgent, print_uci: 
             }
         };
 
-        board = board.make_move(n_move).unwrap();
-        game.push(n_move).unwrap();
+        if n_move.is_semilegal(&board) {
+            board = board.make_move(n_move).unwrap();
+            game.push(n_move).unwrap();
+        }
+        else {
+            println!("illegal move");
+        }
     }
 
     if print_uci {
@@ -56,12 +61,12 @@ fn calc_score(board: &Board, moves: usize, winner: Option<Color>) -> (f64, f64) 
     let mut black_points = get_color_points(board, &Color::Black).clamp(1, usize::MAX);
 
     let mut out = match winner {
-        None => { (0.0, 0.0) }
+        None => { (0.2, 0.2) }
         Some(color) => {
             match color {
-                Color::White => { (1.0, -2.0) }
+                Color::White => { (1.0, -1.5) }
 
-                Color::Black => { (-2.0, 1.0) }
+                Color::Black => { (-1.5, 1.0) }
             }
         }
     };
