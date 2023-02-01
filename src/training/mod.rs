@@ -1,142 +1,75 @@
-use std::fs::{File, OpenOptions};
-use std::io::Write;
 use std::ops::Add;
-use std::path::Path;
-use std::thread::current;
-use libm::round;
-use owlchess::{Board, Color, DrawReason, Outcome};
-use owlchess::Outcome::{Draw, Win};
-use crate::player::Agent;
+use std::sync::Arc;
+use crate::player::agent::OrganicAgent;
+use crate::player::brain::OrganicNNBrain;
+use crate::player::{Brain, Player};
+use crate::training::tournament::rank_organic_players;
 
-pub struct Tournament {
-    players: Vec<Agent>
+pub mod tournament;
+
+pub struct OrganicTrainer {
+    settings: OrganicTrainerSettings,
+    generation: u32,
+    pool: Vec<Arc<OrganicNNBrain>>
 }
 
-pub struct Trainer {
-    current: Vec<Agent>,
-    size: usize,
-    runs: usize,
-    mutate_rate: f32,
-    genome_length: usize,
-    inside_size: usize
+pub struct OrganicTrainerSettings {
+    pub connection_count: usize,
+    pub inner_neuron_count: usize,
+    pub mutation_rate: f64,
+    pub pool_size: usize,
+    pub save_path: String,
+    pub reproduction_sample: usize
 }
 
-struct Game {
-    board: Board,
-    white: Agent,
-    black: Agent,
-    moves: u32
-}
-
-impl Trainer {
-    pub fn new(size: usize, genome_length: usize, inside_size: usize, mutate_rate: f32) -> Trainer {
-        let mut players: Vec<Agent> = Vec::new();
-
-        println!("generating initial players");
-
-        for _ in 0..size {
-            players.push(Agent::random(genome_length, inside_size));
-        }
-
-        Trainer {
-            current: players,
-            size,
-            runs: 0,
-            genome_length,
-            inside_size,
-            mutate_rate
+impl OrganicTrainer {
+    pub fn new(settings: OrganicTrainerSettings) -> OrganicTrainer {
+        let vec = Vec::with_capacity(settings.pool_size);
+        OrganicTrainer {
+            settings,
+            generation: 0,
+            pool: vec
         }
     }
 
-    pub fn run(&mut self) {
-        println!("generating players for tournament #{}", self.runs);
-
-        /*let mut i: usize = 0;
-        while self.current.len() < self.size {
-            self.current.push(self.current[i % self.current.len()].make_child(self.mutate_rate));
+    pub fn init(&mut self) {
+        println!("creating initial pool for gen {}", self.generation);
+        for _ in 0..self.settings.pool_size {
+            self.pool.push(Arc::new(OrganicNNBrain::random(self.settings.inner_neuron_count, self.settings.connection_count)));
         }
-
-        println!("starting tournament #{}", self.runs);
-        let mut t = Tournament::new(self.current.clone());
-
-        t.play_through();
-        let x = t.get_winners();
-
-        if x.len() > 0 {
-            self.current = t.get_winners();
-        }
-*/
-        self.runs += 1;
-    }
-}
-
-impl Tournament {
-    pub fn new(players: Vec<Agent>) -> Tournament {
-        Tournament {
-            players
-        }
+        println!("finished creating initial pool");
     }
 
-    pub fn play_through(&mut self) {
-        for i in 0..self.players.len() {
-            for j in 0..self.players.len() {
-                if j != i {
-                    let black = &self.players[i];
-                    let white = &self.players[j];
-                }
-            }
-        }
-    }
+    pub fn advance_generation(&mut self) {
+        let mut players: Vec<OrganicAgent> = Vec::with_capacity(self.settings.pool_size);
 
-    /*pub fn get_top_x() -> Vec<&Agent> {
-        Vec::new()
-    }*/
-}
+        println!("creating agents");
 
-impl Game {
-    fn new(white: &Agent, black: &Agent) -> Game {
-        Game {
-            board: Board::initial(),
-            white: Agent::random(0, 0),
-            black: Agent::random(0, 0),
-            moves: 0
-        }
-    }
-
-    fn play_through(&mut self) -> (Option<&Agent>, u32) {
-        while !self.advance() && self.moves < 150 {
-            self.moves += 1;
+        for i in 0..self.pool.len() {
+            players.push(OrganicAgent::new(&self.pool[i]));
         }
 
-        match self.board.calc_outcome().unwrap_or(Draw(DrawReason::Moves75)).winner() {
-            None => { (None, self.moves) },
-            Some(winner) => {
-                match winner {
-                    Color::White => {
-                        (Some(&self.white), self.moves)
-                    }
-                    Color::Black => {
-                        (Some(&self.black), self.moves)
-                    }
-                }
-            },
+        println!("playing games");
+
+        rank_organic_players(&mut players);
+
+        self.pool = Vec::with_capacity(self.settings.pool_size);
+
+        println!("generating new pool");
+        let mut i: usize = 0;
+        while self.pool.len() < self.settings.pool_size {
+            self.pool.push(Arc::new(players[i % self.settings.reproduction_sample].get_brain().get_mutated(self.settings.mutation_rate)));
+
+            i += 1;
         }
-    }
 
-    fn advance(&mut self) -> bool {
-        /*match self.side() {
-            Color::White => {
-                self.board = self.board.make_move(self.white.get_next_move(&self.board)).expect("failed to make move");
-            }
-            Color::Black => {
-                self.board = self.board.make_move(self.black.get_next_move(&self.board)).expect("failed to make move");
-            }
-        }*/
+        println!("saving agent");
+        if !self.settings.save_path.is_empty() {
+            players[0].get_brain().write_to(format!("{}/{}.agent", self.settings.save_path, self.generation).as_str());
+        }
 
-        !self.board.has_legal_moves()
-    }
+        println!("top rating for generation {}: {}", self.generation, players[0].get_rating());
 
-    fn side(&self) -> Color {
-        self.board.side()
+        self.generation += 1;
     }
 }

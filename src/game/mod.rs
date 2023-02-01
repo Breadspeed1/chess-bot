@@ -1,4 +1,4 @@
-use owlchess::Piece;
+use owlchess::{Board, Color, Coord, Piece};
 
 pub fn get_points(p: Piece) -> usize {
     match p {
@@ -20,4 +20,19 @@ pub fn get_id(p: Piece) -> usize {
         Piece::Rook => { 4 }
         Piece::Queen => { 5 }
     }
+}
+
+pub fn get_color_points(board: &Board, color: &Color) -> usize {
+    let mut total: usize = 0;
+
+    for x in 0..63 as usize {
+        let cell = board.get(Coord::from_index(x));
+        if let Some(piece) = cell.piece() {
+            if *color == cell.color().unwrap() {
+                total += get_points(piece);
+            }
+        }
+    }
+
+    total
 }
